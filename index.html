@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rokin Laulutreenari - Sanat ja Sävel</title>
+    <title>Automaattinen RockLaulu-Treenari</title>
     <style>
         :root {
             --bg-color: #121212;
             --card-bg: #1e1e1e;
             --accent: #f1c40f;
             --text: #ffffff;
-            --text-dim: #555555;
-            --active-bg: rgba(241, 196, 15, 0.15);
+            --text-dim: #444444;
+            --active-bg: rgba(241, 196, 15, 0.25);
         }
 
         body {
@@ -55,35 +55,35 @@
             margin: 2rem 0;
             min-height: 200px;
             text-align: center;
-            line-height: 2.2;
-            font-size: 1.5rem;
+            line-height: 2.5;
+            font-size: 1.6rem;
             border-left: 4px solid var(--accent);
         }
 
         .word {
             display: inline-block;
             color: var(--text-dim);
-            margin: 0 5px;
-            padding: 2px 6px;
+            margin: 0 6px;
+            padding: 2px 8px;
             border-radius: 4px;
-            transition: all 0.2s ease;
+            transition: all 0.15s ease;
         }
 
         .word.active {
             color: var(--accent);
             background-color: var(--active-bg);
             font-weight: bold;
-            transform: scale(1.15);
+            transform: scale(1.2);
+            box-shadow: 0 0 10px rgba(241, 196, 15, 0.3);
         }
 
         .word.passed {
-            color: #aaaaaa;
-            font-weight: normal;
+            color: #888888;
         }
 
         .line-break {
             display: block;
-            height: 1.2rem;
+            height: 1.5rem;
         }
 
         .controls {
@@ -97,8 +97,8 @@
             background: var(--accent);
             color: black;
             border: none;
-            padding: 1rem 2rem;
-            font-size: 1.1rem;
+            padding: 1rem 2.5rem;
+            font-size: 1.2rem;
             font-weight: bold;
             border-radius: 6px;
             cursor: pointer;
@@ -106,91 +106,81 @@
         }
 
         button:hover { background: #f39c12; transform: scale(1.02); }
-        button:disabled { background: #555; color: #888; cursor: not-allowed; }
         .btn-reset { background: #e74c3c; color: white; }
         .btn-reset:hover { background: #c0392b; }
-
-        .tip {
-            margin-top: 2rem;
-            font-size: 0.9rem;
-            color: #888;
-            font-style: italic;
-        }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>🎸 RockLaulu-Treenari v2</h1>
-        <p class="subtitle">Teksti näkyvissä – värikorostus opastaa sävelen!</p>
+        <h1>🎤 Automaattinen Karaoke-Treenari</h1>
+        <p class="subtitle">Paina vain kerran alussa – laite soittaa melodian ja liikuttaa sanoja!</p>
 
         <label for="song-select">Valitse kappale:</label>
         <select id="song-select" onchange="loadSong()">
             <option value="dontCry">Guns N' Roses - Don't Cry (Kertosäe)</option>
-            <option value="novemberRain">Guns N' Roses - November Rain (Loppuhuipennus)</option>
+            <option value="novemberRain">Guns N' Roses - November Rain</option>
         </select>
 
         <div class="lyrics-container" id="lyrics-display"></div>
 
         <div class="controls">
-            <button id="start-btn" onclick="startSong()">Aloita alusta</button>
-            <button id="next-btn" onclick="nextNote()">Seuraava (Välilyönti)</button>
-            <button class="btn-reset" onclick="resetSong()">Nollaa</button>
+            <button id="start-btn" onclick="startSong()">▶ ALOITA LAULU</button>
+            <button class="btn-reset" onclick="resetSong()">Pysäytä / Nollaa</button>
         </div>
-
-        <p class="tip">Vinkki: Paina <strong>välilyöntiä</strong> vaihtaaksesi seuraavaan sanaan.</p>
     </div>
 
     <script>
         let audioCtx = null;
+        let playTimeout = null;
 
         const notes = {
-            'G3': 196.00, 'A3': 220.00, 'A#3': 233.08, 'B3': 246.94,
-            'C4': 261.63, 'C#4': 277.18, 'D4': 293.66, 'D#4': 311.13, 'E4': 329.63, 'F4': 349.23, 'F#4': 369.99, 'G4': 392.00, 'G#4': 415.30,
-            'A4': 440.00, 'A#4': 466.16, 'B4': 493.88, 'C5': 523.25, 'C#5': 554.37, 'D5': 587.33, 'E5': 659.25, 'F5': 698.46
+            'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00, 'A4': 440.00,
+            'A#4': 466.16, 'C5': 523.25, 'D5': 587.33, 'F5': 698.46
         };
 
+        // Kestot millisekunneissa (kuinka pitkään kukin sana soi/kestää)
         const songDatabase = {
             dontCry: [
-                { text: "Don't", note: "A4", newLine: false },
-                { text: "you", note: "G4", newLine: false },
-                { text: "cry", note: "F4", newLine: false },
-                { text: "tonight", note: "E4", newLine: false },
-                { text: "...", note: "D4", newLine: false },
+                { text: "Don't", note: "A4", duration: 800 },
+                { text: "you", note: "G4", duration: 600 },
+                { text: "cry", note: "F4", duration: 1200 },
+                { text: "tonight", note: "E4", duration: 1400 },
+                { text: "...", note: "D4", duration: 1000 },
                 { text: "", note: "", newLine: true },
-                { text: "There's", note: "A4", newLine: false },
-                { text: "a", note: "A4", newLine: false },
-                { text: "heaven", note: "G4", newLine: false },
-                { text: "above", note: "F4", newLine: false },
-                { text: "you", note: "E4", newLine: false },
-                { text: "baby", note: "D4", newLine: false },
+                { text: "There's", note: "A4", duration: 600 },
+                { text: "a", note: "A4", duration: 400 },
+                { text: "heaven", note: "G4", duration: 1000 },
+                { text: "above", note: "F4", duration: 1000 },
+                { text: "you", note: "E4", duration: 800 },
+                { text: "baby", note: "D4", duration: 1600 },
                 { text: "", note: "", newLine: true },
-                { text: "Don't", note: "A4", newLine: false },
-                { text: "you", note: "G4", newLine: false },
-                { text: "cry", note: "F4", newLine: false },
-                { text: "tonight", note: "E4", newLine: false }
+                { text: "Don't", note: "A4", duration: 800 },
+                { text: "you", note: "G4", duration: 600 },
+                { text: "cry", note: "F4", duration: 1200 },
+                { text: "tonight", note: "E4", duration: 2000 }
             ],
             novemberRain: [
-                { text: "Don't", note: "G4", newLine: false },
-                { text: "you", note: "A4", newLine: false },
-                { text: "think", note: "A#4", newLine: false },
-                { text: "that", note: "C5", newLine: false },
-                { text: "you", note: "D5", newLine: false },
-                { text: "need", note: "C5", newLine: false },
-                { text: "somebody?", note: "A#4", newLine: false },
+                { text: "Don't", note: "G4", duration: 800 },
+                { text: "you", note: "A4", duration: 600 },
+                { text: "think", note: "A#4", duration: 600 },
+                { text: "that", note: "C5", duration: 600 },
+                { text: "you", note: "D5", duration: 800 },
+                { text: "need", note: "C5", duration: 800 },
+                { text: "somebody?", note: "A#4", duration: 1800 },
                 { text: "", note: "", newLine: true },
-                { text: "Don't", note: "G4", newLine: false },
-                { text: "you", note: "A4", newLine: false },
-                { text: "think", note: "A#4", newLine: false },
-                { text: "that", note: "C5", newLine: false },
-                { text: "you", note: "D5", newLine: false },
-                { text: "need", note: "F5", newLine: false },
-                { text: "someone?", note: "D5", newLine: false },
+                { text: "Don't", note: "G4", duration: 800 },
+                { text: "you", note: "A4", duration: 600 },
+                { text: "think", note: "A#4", duration: 600 },
+                { text: "that", note: "C5", duration: 600 },
+                { text: "you", note: "D5", duration: 800 },
+                { text: "need", note: "F5", duration: 800 },
+                { text: "someone?", note: "D5", duration: 1800 },
                 { text: "", note: "", newLine: true },
-                { text: "Everybody", note: "C5", newLine: false },
-                { text: "needs", note: "A#4", newLine: false },
-                { text: "somebody", note: "A4", newLine: false },
-                { text: "...", note: "G4", newLine: false }
+                { text: "Everybody", note: "C5", duration: 1200 },
+                { text: "needs", note: "A#4", duration: 800 },
+                { text: "somebody", note: "A4", duration: 1200 },
+                { text: "...", note: "G4", duration: 1500 }
             ]
         };
 
@@ -204,9 +194,9 @@
         }
 
         function loadSong() {
+            resetSong();
             const songKey = document.getElementById('song-select').value;
             currentSong = songDatabase[songKey];
-            currentIndex = -1;
             
             const display = document.getElementById('lyrics-display');
             display.innerHTML = '';
@@ -228,77 +218,69 @@
 
         function startSong() {
             initAudio();
+            resetSong();
             currentIndex = 0;
-            while (currentIndex < currentSong.length && currentSong[currentIndex].newLine) {
-                currentIndex++;
-            }
-            updateHighlightAndPlay();
+            playLoop();
         }
 
-        function updateHighlightAndPlay() {
-            currentSong.forEach((item, index) => {
-                const el = document.getElementById(`word-${index}`);
-                if (el) {
-                    if (index < currentIndex) {
-                        el.className = 'word passed';
-                    } else if (index === currentIndex) {
-                        el.className = 'word active';
-                    } else {
-                        el.className = 'word';
-                    }
-                }
-            });
-
+        // Tämä funktio pyörittää karaokea itsestään sanasta seuraavaan
+        function playLoop() {
             if (currentIndex >= currentSong.length) {
-                return;
+                return; // Biisi loppui
             }
 
             const currentStep = currentSong[currentIndex];
 
-            if (currentStep && currentStep.note && notes[currentStep.note]) {
+            if (currentStep.newLine) {
+                currentIndex++;
+                playLoop();
+                return;
+            }
+
+            // Väritetään sanat
+            currentSong.forEach((item, index) => {
+                const el = document.getElementById(`word-${index}`);
+                if (el) {
+                    if (index < currentIndex) el.className = 'word passed';
+                    else if (index === currentIndex) el.className = 'word active';
+                    else el.className = 'word';
+                }
+            });
+
+            // Soitetaan nuotti automaattisesti
+            if (currentStep.note && notes[currentStep.note]) {
                 const osc = audioCtx.createOscillator();
                 const gainNode = audioCtx.createGain();
                 
                 osc.type = 'sine';
                 osc.frequency.value = notes[currentStep.note];
                 
-                gainNode.gain.setValueAtTime(0.25, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+                // Pidetään ääntä yllä melkein koko sanan keston ajan
+                const noteDurationSeconds = (currentStep.duration - 50) / 1000;
+                
+                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + noteDurationSeconds);
                 
                 osc.connect(gainNode);
                 gainNode.connect(audioCtx.destination);
                 
                 osc.start();
-                osc.stop(audioCtx.currentTime + 0.6);
-            }
-        }
-
-        function nextNote() {
-            if (currentIndex === -1) {
-                startSong();
-                return;
+                osc.stop(audioCtx.currentTime + noteDurationSeconds);
             }
 
-            if (currentIndex < currentSong.length) {
-                currentIndex++;
-                while (currentIndex < currentSong.length && currentSong[currentIndex].newLine) {
-                    currentIndex++;
-                }
-                updateHighlightAndPlay();
-            }
+            // Asetetaan ajastin siirtymään seuraavaan sanaan automaattisesti!
+            currentIndex++;
+            playTimeout = setTimeout(playLoop, currentStep.duration);
         }
 
         function resetSong() {
+            clearTimeout(playTimeout);
             currentIndex = -1;
-            loadSong();
+            currentSong.forEach((item, index) => {
+                const el = document.getElementById(`word-${index}`);
+                if (el) el.className = 'word';
+            });
         }
-
-        document.addEventListener('keydown', function(event) {
-            if (event.code === 'Space') {
-                event.preventDefault();
-                nextNote();
-            }
-        });
 
         loadSong();
     </script>
