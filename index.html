@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oma Laulukoulu & Nuottimittari</title>
+    <title>Oma Yousician & Laulukone</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -23,95 +23,171 @@
         }
         button {
             width: 100%;
-            padding: 12px;
+            padding: 15px;
             margin: 8px 0;
             border-radius: 8px;
-            border: 1px solid #ccc;
-            font-size: 16px;
-            background-color: #3498db;
-            color: white;
             border: none;
+            font-size: 18px;
+            background-color: #2ecc71;
+            color: white;
             cursor: pointer;
             font-weight: bold;
         }
-        button:hover { background-color: #2980b9; }
+        button:hover { background-color: #27ae60; }
         #stopBtn { background-color: #e74c3c; display: none; }
         
-        /* Yousician-tyylinen nuottinäyttö */
+        select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            background-color: #fff;
+        }
+
+        /* Pianonapit */
+        .piano-container {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        .piano-btn {
+            flex: 1;
+            min-width: 45px;
+            padding: 15px 5px;
+            background-color: white;
+            color: #333;
+            border: 2px solid #2c3e50;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+        }
+        .piano-btn:active {
+            background-color: #34495e;
+            color: white;
+        }
+
+        /* Treeninhallinta */
+        .exercise-panel {
+            background-color: #e8f4f8;
+            border-left: 5px solid #3498db;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        .exercise-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .ex-btn {
+            background-color: #3498db;
+            font-size: 15px;
+            padding: 10px;
+        }
+        .ex-btn:hover { background-color: #2980b9; }
+
         .pitch-container {
             text-align: center;
             padding: 20px;
             background: #2c3e50;
             color: #2ecc71;
             border-radius: 8px;
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
             margin: 10px 0;
         }
-        .hz-text {
-            font-size: 14px;
-            color: #bdc3c7;
-            font-weight: normal;
-        }
+        .hz-text { font-size: 14px; color: #bdc3c7; font-weight: normal; }
         
-        .lyrics {
-            white-space: pre-line;
+        .lyrics-box {
             text-align: center;
-            font-size: 18px;
+            font-size: 22px;
+            font-weight: bold;
             line-height: 1.6;
-            font-style: italic;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             background: #fdfefe;
             padding: 15px;
-            border-left: 4px solid #3498db;
+            border: 2px dashed #3498db;
+            border-radius: 8px;
+            color: #34495e;
         }
-        #palauteBox {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-            display: none;
-        }
+        .active-word { color: #e67e22; font-size: 26px; transition: all 0.2s; }
         audio { width: 100%; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <h1>Oma Laulukoulu & Nuottimittari 🎤</h1>
+    <h1>Oma Laulukoulu & Treenari 🎤</h1>
+
+    <!-- VALITTAVAT HARJOITUKSET -->
+    <div class="box">
+        <label for="exerciseSelect"><strong>Valitse lauluharjoitus:</strong></label>
+        <select id="exerciseSelect" onchange="vaihdaHarjoitus()">
+            <option value="vapaa">Vapaa nuottitreeni & Pianonapit</option>
+            <option value="twinkle">Intervalli: Twinkle Twinkle (Kvinttihyppy)</option>
+            <option value="sireeni">Sireeniliuku (Äänihuulien joustavuus)</option>
+            <option value="puhesavel">Puhesävelen laajennus (Rento rintaääni)</option>
+        </select>
+
+        <div id="exerciseInstructionPanel" class="exercise-panel" style="margin-top: 15px;">
+            <h4 id="exTitle" style="margin-top:0;">Vapaa nuottitreeni</h4>
+            <p id="exDesc" style="font-size: 14px; margin-bottom:10px;">Paina alta pianonappeja kuullaksesi nuotin, ota mallia ja yritä laulaa sama nuotti perässä mittariin.</p>
+            <div id="exControls" class="exercise-buttons">
+                <!-- Dynaamiset napit ilmestyvät tähän -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Pianonapit korvakuulolle (Aina näkyvissä perusharjoitteluun) -->
+    <div class="box">
+        <h3>Pianonapit (Baritoni-alue G3–G4)</h3>
+        <div class="piano-container">
+            <button class="piano-btn" onclick="soitaYksiNuotti(196.00, 'G3')">G3</button>
+            <button class="piano-btn" onclick="soitaYksiNuotti(220.00, 'A3')">A3</button>
+            <button class="piano-btn" onclick="soitaYksiNuotti(246.94, 'B3')">B3</button>
+            <button class="piano-btn" onclick="soitaYksiNuotti(261.63, 'C4')">C4</button>
+            <button class="piano-btn" onclick="soitaYksiNuotti(293.66, 'D4')">D4</button>
+            <button class="piano-btn" onclick="soitaYksiNuotti(329.63, 'E4')">E4</button>
+            <button class="piano-btn" onclick="soitaYksiNuotti(349.23, 'F4')">F4</button>
+            <button class="piano-btn" onclick="soitaYksiNuotti(392.00, 'G4')">G4</button>
+        </div>
+    </div>
 
     <!-- Yousician-mittari -->
     <div class="box">
-        <h3>Reaaliaikainen nuotti (Yousician-tyyliin)</h3>
+        <h3>Sinun nuottisi juuri nyt:</h3>
         <div class="pitch-container">
-            <span id="noteDisplay">Käynnistä äänitys...</span>
+            <span id="noteDisplay">Mittari valmiina...</span>
             <div id="hzDisplay" class="hz-text">- Hz</div>
         </div>
+        <button id="mittariBtn" onclick="kaynnistaPelkkaMittari()" style="background-color: #34495e; padding: 8px; font-size: 14px;">Käynnistä mittari laulutreeniä varten</button>
     </div>
 
-    <!-- Sanoitukset -->
+    <!-- Karaokeboksi "Jänis istui maassa" -->
     <div class="box">
-        <h3>Kulkuri ja joutsen</h3>
-        <div class="lyrics">
-            Tääl' yksinäinen kulkuri laulelee,
-            kun joutsenet lampeen laskeutuu.
-            Niin kauniisti siivet ne kimmeltää,
-            ja rantaan jo varjot sulkeutuu.
+        <h3>Kappaleharjoitus: Jänis istui maassa</h3>
+        <div style="margin-bottom: 10px;">
+            <label for="pitchSelect" style="font-size:14px;">Valitse sävelaji:</label>
+            <select id="pitchSelect" style="padding:5px; font-size:14px; width:auto;">
+                <option value="matala">Matala baritoni (G)</option>
+                <option value="keski" selected>Normaali baritoni (A)</option>
+                <option value="korkea">Alkuperäinen korkea (C)</option>
+            </select>
         </div>
-    </div>
-
-    <!-- Äänityskontrollit -->
-    <div class="box">
-        <button id="startBtn" onclick="aloitaKaikki()">Aloita laulutunti</button>
-        <button id="stopBtn" onclick="lopetaKaikki()">Lopeta ja ota palaute</button>
+        <div id="lyricsDisplay" class="lyrics-box">Paina alta aloittaaksesi karaoken!</div>
+        <button id="startBtn" onclick="aloitaKaikki()">Aloita laulu ja taustamusiikki</button>
+        <button id="stopBtn" onclick="lopetaKaikki()">Lopeta esitys</button>
         
         <div id="audioPlayerBox" style="margin-top: 15px; display: none;">
-            <p>Kuuntele oma veto:</p>
+            <p>Kuuntele oma esityksesi:</p>
             <audio id="audioPlayback" controls></audio>
         </div>
-    </div>
-
-    <!-- Palaute -->
-    <div id="palauteBox" class="box">
-        <h3>Opettajan palaute:</h3>
-        <p id="palauteTeksti"></p>
     </div>
 
     <script>
@@ -122,86 +198,211 @@
         let dataArray;
         let source;
         let animationId;
+        let musicTimeout;
 
-        const kehut = [
-            "Wau! Lauloitpa upealla energialla! Äänesi väri pääsee tässä kappaleessa todella kauniisti esiin.",
-            "Loistava suoritus! Erityisesti rytmi pysyi hienosti kasassa ja tulkinnassa oli aitoa tunnetta.",
-            "Upeaa kuultavaa! Huomaa, että olet harjoitellut – äänenpito oli vakaata ja varmalla pohjalla.",
-            "Mahtava veto! Korkeammat äänet soivat todella puhtaasti ja rohkeasti. Jatka samaan malliin!"
-        ];
+        const taajuudet = {
+            'G3': 196.00, 'A3': 220.00, 'B3': 246.94, 'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00,
+            'A4': 440.00, 'C#4': 277.18, 'E4_alt': 329.63, 'B3_alt': 246.94, 'D4_alt': 293.66, 'F#4': 369.99, 'C4_alt': 261.63, 'D4_alt2': 293.66, 'E4_alt2': 329.63, 'A3_alt': 220.00
+        };
 
-        // Nuottien nimet taajuuksille
         const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+
+        // Harjoituspankin tiedot ja ohjeet
+        const harjoitukset = {
+            vapaa: {
+                otsikko: "Vapaa nuottitreeni",
+                ohje: "Paina pianonappeja kuullaksesi yksittäisiä säveliä. Yritä laulaa sama sävel perässä. Tavoitteena on oppia muistamaan miltä nuotti kuulostaa.",
+                napit: []
+            },
+            twinkle: {
+                otsikko: "Intervalli: Twinkle Twinkle (Kvintti)",
+                ohje: "Tämä harjoitus opettaa ison hypyn alhaalta ylös. Älä hyppää suoraan, vaan kokeile aluksi 'liukua' (glissando) nuotista 1 nuottiin 2 käyttäen tavua <b>'BUB'</b> tai <b>'MM'</b>.",
+                napit: [
+                    { teksti: "1. Twin- (Matala G3)", hz: 196.00 },
+                    { teksti: "2. -kle (Korkea D4)", hz: 293.66 }
+                ]
+            },
+            sireeni: {
+                otsikko: "Sireeniliuku (Sirens)",
+                ohje: "Pörise huulilla tai hurise 'MMM'-äänteellä. Aloita matalalta nuotilta ja liu'uta äänesi tasaisesti ylänuotille ja takaisin alas ilman portaita – kuin ambulanssi.",
+                napit: [
+                    { teksti: "Kuuntele alin piste (A3)", hz: 220.00 },
+                    { teksti: "Kuuntele ylin piste (E4)", hz: 329.63 }
+                ]
+            },
+            puhesavel: {
+                otsikko: "Puhesävelen laajennus",
+                ohje: "Ota rennosti puheäänesi korkeus (usein A3 baritonilla). Sano tavallinen lause, mutta venytä vokaaleja pitkään. Tämä poistaa laulamisen jännityksen kurkusta.",
+                napit: [
+                    { teksti: "Kuuntele puhetaso (A3)", hz: 220.00 },
+                    { teksti: "Hieman puheen yläpuolella (C4)", hz: 261.63 }
+                ]
+            }
+        };
+
+        function vaihdaHarjoitus() {
+            const valinta = document.getElementById("exerciseSelect").value;
+            const data = harjoitukset[valinta];
+            
+            document.getElementById("exTitle").innerText = data.otsikko;
+            document.getElementById("exDesc").innerHTML = data.ohje;
+            
+            const nukkari = document.getElementById("exControls");
+            nukkari.innerHTML = ""; // Tyhjennetään vanhat napit
+            
+            data.napit.forEach(nappi => {
+                const btn = document.createElement("button");
+                btn.className = "piano-btn ex-btn";
+                btn.innerHTML = nappi.teksti;
+                btn.onclick = () => soitaYksiNuotti(nappi.hz, '');
+                nukkari.appendChild(btn);
+            });
+        }
+
+        const perusKappale = [
+            { aika: 0.0, sanat: "Jänis", nuotit: { korkea: 'C4', keski: 'A3', matala: 'G3' } },
+            { aika: 0.5, sanat: "istui", nuotit: { korkea: 'E4', keski: 'C#4', matala: 'B3_alt' } },
+            { aika: 1.0, sanat: "maassa", nuotit: { korkea: 'G4', keski: 'E4_alt', matala: 'D4_alt2' } },
+            { aika: 1.5, sanat: "maassa", nuotit: { korkea: 'G4', keski: 'E4_alt', matala: 'D4_alt2' } },
+            { aika: 2.0, sanat: "torkkuen,", nuotit: { korkea: 'E4', keski: 'C#4', matala: 'B3_alt' } },
+            { aika: 3.0, sanat: "Mikä", nuotit: { korkea: 'D4', keski: 'B3', matala: 'A3_alt' } },
+            { aika: 3.5, sanat: "sun", nuotit: { korkea: 'F4', keski: 'D4_alt', matala: 'C4_alt' } },
+            { aika: 4.0, sanat: "on", nuotit: { korkea: 'A4', keski: 'F#4', matala: 'E4_alt2' } },
+            { aika: 4.5, sanat: "jänis", nuotit: { korkea: 'A4', keski: 'F#4', matala: 'E4_alt2' } },
+            { aika: 5.0, sanat: "pieni,", nuotit: { korkea: 'F4', keski: 'D4_alt', matala: 'C4_alt' } },
+            { aika: 6.0, sanat: "Kun", nuotit: { korkea: 'G4', keski: 'E4_alt', matala: 'D4_alt2' } },
+            { aika: 6.5, sanat: "et", nuotit: { korkea: 'G4', keski: 'E4_alt', matala: 'D4_alt2' } },
+            { aika: 7.0, sanat: "enää", nuotit: { korkea: 'E4', keski: 'C#4', matala: 'B3_alt' } },
+            { aika: 7.5, sanat: "hypi", nuotit: { korkea: 'C4', keski: 'A3', matala: 'G3' } },
+            { aika: 8.0, sanat: "ollenkaan?", nuotit: { korkea: 'D4', keski: 'B3', matala: 'A3_alt' } },
+            { aika: 9.5, sanat: "Hyppää", nuotit: { korkea: 'G4', keski: 'E4_alt', matala: 'D4_alt2' } },
+            { aika: 10.0, sanat: "pois,", nuotit: { korkea: 'E4', keski: 'C#4', matala: 'B3_alt' } },
+            { aika: 10.5, sanat: "hyppää", nuotit: { korkea: 'G4', keski: 'E4_alt', matala: 'D4_alt2' } },
+            { aika: 11.0, sanat: "pois,", nuotit: { korkea: 'E4', keski: 'C#4', matala: 'B3_alt' } },
+            { aika: 11.5, sanat: "hyppää", nuotit: { korkea: 'D4', keski: 'B3', matala: 'A3_alt' } },
+            { aika: 12.0, sanat: "pois!", nuotit: { korkea: 'C4', keski: 'A3', matala: 'G3' } }
+        ];
 
         function noteFromPitch(frequency) {
             const noteNum = 12 * (Math.log(frequency / 440) / Math.log(2));
             return Math.round(noteNum) + 69;
         }
 
+        function soitaYksiNuotti(taajuus, nuotinNimi) {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+            
+            let osc = audioContext.createOscillator();
+            let gain = audioContext.createGain();
+            
+            osc.type = 'triangle';
+            osc.frequency.value = taajuus;
+            
+            gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.8);
+            
+            osc.connect(gain);
+            gain.connect(audioContext.destination);
+            
+            osc.start();
+            osc.stop(audioContext.currentTime + 0.8);
+        }
+
+        async function alustaAudioMikit() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 2048;
+            source = audioContext.createMediaStreamSource(stream);
+            source.connect(analyser);
+            dataArray = new Float32Array(analyser.fftSize);
+        }
+
+        async function kaynnistaPelkkaMittari() {
+            await alustaAudioMikit();
+            document.getElementById("mittariBtn").style.display = "none";
+            paivitaNuotti();
+        }
+
         async function aloitaKaikki() {
             audioChunks = [];
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            await alustaAudioMikit();
             
-            // 1. ÄÄNITYS (Kuten Audacity)
+            const stream = source.mediaStream;
             mediaRecorder = new MediaRecorder(stream);
             mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
             mediaRecorder.onstop = () => {
                 const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
                 document.getElementById("audioPlayback").src = URL.createObjectURL(audioBlob);
                 document.getElementById("audioPlayerBox").style.display = "block";
-                annaPalautetta();
             };
             mediaRecorder.start();
 
-            // 2. REAALIAIKAINEN ANALYYSI (Yousician)
-            audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            analyser = audioContext.createAnalyser();
-            analyser.fftSize = 2048;
-            source = audioContext.createMediaStreamSource(stream);
-            source.connect(analyser);
-            dataArray = new Float32Array(analyser.fftSize);
-
             document.getElementById("startBtn").style.display = "none";
             document.getElementById("stopBtn").style.display = "block";
-            document.getElementById("palauteBox").style.display = "none";
 
             paivitaNuotti();
+            soitaMusiikki();
         }
 
-        // Autokorrelaatio-algoritmi (laskee äänen korkeuden)
+        function soitaMusiikki() {
+            const nykyhetki = audioContext.currentTime;
+            const valittuKorkeus = document.getElementById("pitchSelect").value;
+            
+            perusKappale.forEach(tavu => {
+                let muistiinpanoNuotti = tavu.nuotit[valittuKorkeus];
+                let soitettavaTaajuus = taajuudet[muistiinpanoNuotti];
+
+                let osc = audioContext.createOscillator();
+                let gain = audioContext.createGain();
+                osc.type = 'triangle';
+                osc.frequency.value = soitettavaTaajuus;
+                
+                gain.gain.setValueAtTime(0.15, nykyhetki + tavu.aika);
+                gain.gain.exponentialRampToValueAtTime(0.001, nykyhetki + tavu.aika + 0.45);
+                
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+                
+                osc.start(nykyhetki + tavu.aika);
+                osc.stop(nykyhetki + tavu.aika + 0.5);
+
+                setTimeout(() => {
+                    let naytettavaNimi = muistiinpanoNuotti.split('_')[0];
+                    document.getElementById("lyricsDisplay").innerHTML = `<span class="active-word">${tavu.sanat}</span><br><small style="color:#7f8c8d;">Tavoiteltava nuotti: ${naytettavaNimi}</small>`;
+                }, tavu.aika * 1000);
+            });
+
+            musicTimeout = setTimeout(() => { lopetaKaikki(); }, 14000);
+        }
+
         function autoCorrelate(buffer, sampleRate) {
             let SIZE = buffer.length;
+            let rms = 0;
+            for (let i = 0; i < SIZE; i++) { let val = buffer[i]; rms += val * val; }
+            rms = Math.sqrt(rms / SIZE);
+            if (rms < 0.015) return -1; 
+
             let maxSamples = Math.floor(SIZE / 2);
             let bestOffset = -1;
             let bestCorrelation = 0;
-            let rms = 0;
-
-            for (let i = 0; i < SIZE; i++) {
-                let val = buffer[i];
-                rms += val * val;
-            }
-            rms = Math.sqrt(rms / SIZE);
-            if (rms < 0.01) return -1; // Liian hiljainen ääni
-
             let lastCorrelation = 1;
             for (let offset = 0; offset < maxSamples; offset++) {
                 let correlation = 0;
-
-                for (let i = 0; i < maxSamples; i++) {
-                    correlation += Math.abs((buffer[i]) - (buffer[i + offset]));
-                }
+                for (let i = 0; i < maxSamples; i++) { correlation += Math.abs((buffer[i]) - (buffer[i + offset])); }
                 correlation = 1 - (correlation / maxSamples);
                 if ((correlation > 0.9) && (correlation > lastCorrelation)) {
-                    if (correlation > bestCorrelation) {
-                        bestCorrelation = correlation;
-                        bestOffset = offset;
-                    }
+                    if (correlation > bestCorrelation) { bestCorrelation = correlation; bestOffset = offset; }
                 }
                 lastCorrelation = correlation;
             }
-            if (bestCorrelation > 0.01) {
-                return sampleRate / bestOffset;
-            }
+            if (bestCorrelation > 0.01) return sampleRate / bestOffset;
             return -1;
         }
 
@@ -209,9 +410,7 @@
             analyser.getFloatTimeDomainData(dataArray);
             let pitch = autoCorrelate(dataArray, audioContext.sampleRate);
 
-            if (pitch === -1 || pitch > 1000) {
-                // Ei lauleta mitään tai ääni on häiriötä
-            } else {
+            if (pitch !== -1 && pitch < 1000) {
                 let noteNum = noteFromPitch(pitch);
                 let noteName = noteStrings[noteNum % 12];
                 let octave = Math.floor(noteNum / 12) - 1;
@@ -219,25 +418,22 @@
                 document.getElementById("noteDisplay").innerText = noteName + octave;
                 document.getElementById("hzDisplay").innerText = Math.round(pitch) + " Hz";
             }
-
             animationId = requestAnimationFrame(paivitaNuotti);
         }
 
         function lopetaKaikki() {
-            mediaRecorder.stop();
+            clearTimeout(musicTimeout);
+            if (mediaRecorder && mediaRecorder.state !== "inactive") mediaRecorder.stop();
             cancelAnimationFrame(animationId);
-            if (audioContext) audioContext.close();
             
             document.getElementById("startBtn").style.display = "block";
             document.getElementById("stopBtn").style.display = "none";
-            document.getElementById("noteDisplay").innerText = "Tunti päättyi";
+            document.getElementById("mittariBtn").style.display = "block";
+            document.getElementById("noteDisplay").innerText = "Treeni loppui";
         }
-
-        function annaPalautetta() {
-            const satunnainenKehu = kehut[Math.floor(Math.random() * kehut.length)];
-            document.getElementById("palauteTeksti").innerText = satunnainenKehu;
-            document.getElementById("palauteBox").style.display = "block";
-        }
+        
+        // Alustetaan sivu näyttämään ensimmäinen harjoitus oikein
+        window.onload = vaihdaHarjoitus;
     </script>
 </body>
 </html>
