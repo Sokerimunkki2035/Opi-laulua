@@ -3,286 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Automaattinen RockLaulu-Treenari</title>
+    <title>Oma Laulukoulu & Nuottimittari</title>
     <style>
-        :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --accent: #f1c40f;
-            --text: #ffffff;
-            --text-dim: #444444;
-            --active-bg: rgba(241, 196, 15, 0.25);
-        }
-
         body {
-            background-color: var(--bg-color);
-            color: var(--text);
-            font-family: 'Segoe UI', Arial, sans-serif;
-            text-align: center;
-            padding: 2rem;
-            margin: 0;
-        }
-
-        .container {
-            max-width: 700px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            max-width: 600px;
             margin: 0 auto;
-            background: var(--card-bg);
-            padding: 2rem;
+            padding: 20px;
+        }
+        h1 { text-align: center; color: #2c3e50; }
+        .box {
+            background: white;
+            padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
-            border: 2px solid var(--accent);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
         }
-
-        h1 { color: var(--accent); margin-bottom: 0.5rem; }
-        .subtitle { color: #888; margin-bottom: 2rem; }
-
-        select {
-            width: 100%;
-            padding: 0.8rem;
-            background: #333;
-            color: white;
-            border: 1px solid var(--accent);
-            border-radius: 6px;
-            font-size: 1.1rem;
-            margin-bottom: 1.5rem;
-            cursor: pointer;
-        }
-
-        .lyrics-container {
-            background: #151515;
-            padding: 2rem;
-            border-radius: 8px;
-            margin: 2rem 0;
-            min-height: 200px;
-            text-align: center;
-            line-height: 2.5;
-            font-size: 1.6rem;
-            border-left: 4px solid var(--accent);
-        }
-
-        .word {
-            display: inline-block;
-            color: var(--text-dim);
-            margin: 0 6px;
-            padding: 2px 8px;
-            border-radius: 4px;
-            transition: all 0.15s ease;
-        }
-
-        .word.active {
-            color: var(--accent);
-            background-color: var(--active-bg);
-            font-weight: bold;
-            transform: scale(1.2);
-            box-shadow: 0 0 10px rgba(241, 196, 15, 0.3);
-        }
-
-        .word.passed {
-            color: #888888;
-        }
-
-        .line-break {
-            display: block;
-            height: 1.5rem;
-        }
-
-        .controls {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            margin-top: 1.5rem;
-        }
-
         button {
-            background: var(--accent);
-            color: black;
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            background-color: #3498db;
+            color: white;
             border: none;
-            padding: 1rem 2.5rem;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 6px;
             cursor: pointer;
-            transition: transform 0.1s, background 0.2s;
+            font-weight: bold;
         }
-
-        button:hover { background: #f39c12; transform: scale(1.02); }
-        .btn-reset { background: #e74c3c; color: white; }
-        .btn-reset:hover { background: #c0392b; }
+        button:hover { background-color: #2980b9; }
+        #stopBtn { background-color: #e74c3c; display: none; }
+        
+        /* Yousician-tyylinen nuottinäyttö */
+        .pitch-container {
+            text-align: center;
+            padding: 20px;
+            background: #2c3e50;
+            color: #2ecc71;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .hz-text {
+            font-size: 14px;
+            color: #bdc3c7;
+            font-weight: normal;
+        }
+        
+        .lyrics {
+            white-space: pre-line;
+            text-align: center;
+            font-size: 18px;
+            line-height: 1.6;
+            font-style: italic;
+            background: #fdfefe;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+        }
+        #palauteBox {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: none;
+        }
+        audio { width: 100%; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>🎤 Automaattinen Karaoke-Treenari</h1>
-        <p class="subtitle">Paina vain kerran alussa – laite soittaa melodian ja liikuttaa sanoja!</p>
+    <h1>Oma Laulukoulu & Nuottimittari 🎤</h1>
 
-        <label for="song-select">Valitse kappale:</label>
-        <select id="song-select" onchange="loadSong()">
-            <option value="dontCry">Guns N' Roses - Don't Cry (Kertosäe)</option>
-            <option value="novemberRain">Guns N' Roses - November Rain</option>
-        </select>
-
-        <div class="lyrics-container" id="lyrics-display"></div>
-
-        <div class="controls">
-            <button id="start-btn" onclick="startSong()">▶ ALOITA LAULU</button>
-            <button class="btn-reset" onclick="resetSong()">Pysäytä / Nollaa</button>
+    <!-- Yousician-mittari -->
+    <div class="box">
+        <h3>Reaaliaikainen nuotti (Yousician-tyyliin)</h3>
+        <div class="pitch-container">
+            <span id="noteDisplay">Käynnistä äänitys...</span>
+            <div id="hzDisplay" class="hz-text">- Hz</div>
         </div>
     </div>
 
+    <!-- Sanoitukset -->
+    <div class="box">
+        <h3>Kulkuri ja joutsen</h3>
+        <div class="lyrics">
+            Tääl' yksinäinen kulkuri laulelee,
+            kun joutsenet lampeen laskeutuu.
+            Niin kauniisti siivet ne kimmeltää,
+            ja rantaan jo varjot sulkeutuu.
+        </div>
+    </div>
+
+    <!-- Äänityskontrollit -->
+    <div class="box">
+        <button id="startBtn" onclick="aloitaKaikki()">Aloita laulutunti</button>
+        <button id="stopBtn" onclick="lopetaKaikki()">Lopeta ja ota palaute</button>
+        
+        <div id="audioPlayerBox" style="margin-top: 15px; display: none;">
+            <p>Kuuntele oma veto:</p>
+            <audio id="audioPlayback" controls></audio>
+        </div>
+    </div>
+
+    <!-- Palaute -->
+    <div id="palauteBox" class="box">
+        <h3>Opettajan palaute:</h3>
+        <p id="palauteTeksti"></p>
+    </div>
+
     <script>
-        let audioCtx = null;
-        let playTimeout = null;
+        let mediaRecorder;
+        let audioChunks = [];
+        let audioContext;
+        let analyser;
+        let dataArray;
+        let source;
+        let animationId;
 
-        const notes = {
-            'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00, 'A4': 440.00,
-            'A#4': 466.16, 'C5': 523.25, 'D5': 587.33, 'F5': 698.46
-        };
+        const kehut = [
+            "Wau! Lauloitpa upealla energialla! Äänesi väri pääsee tässä kappaleessa todella kauniisti esiin.",
+            "Loistava suoritus! Erityisesti rytmi pysyi hienosti kasassa ja tulkinnassa oli aitoa tunnetta.",
+            "Upeaa kuultavaa! Huomaa, että olet harjoitellut – äänenpito oli vakaata ja varmalla pohjalla.",
+            "Mahtava veto! Korkeammat äänet soivat todella puhtaasti ja rohkeasti. Jatka samaan malliin!"
+        ];
 
-        // Kestot millisekunneissa (kuinka pitkään kukin sana soi/kestää)
-        const songDatabase = {
-            dontCry: [
-                { text: "Don't", note: "A4", duration: 800 },
-                { text: "you", note: "G4", duration: 600 },
-                { text: "cry", note: "F4", duration: 1200 },
-                { text: "tonight", note: "E4", duration: 1400 },
-                { text: "...", note: "D4", duration: 1000 },
-                { text: "", note: "", newLine: true },
-                { text: "There's", note: "A4", duration: 600 },
-                { text: "a", note: "A4", duration: 400 },
-                { text: "heaven", note: "G4", duration: 1000 },
-                { text: "above", note: "F4", duration: 1000 },
-                { text: "you", note: "E4", duration: 800 },
-                { text: "baby", note: "D4", duration: 1600 },
-                { text: "", note: "", newLine: true },
-                { text: "Don't", note: "A4", duration: 800 },
-                { text: "you", note: "G4", duration: 600 },
-                { text: "cry", note: "F4", duration: 1200 },
-                { text: "tonight", note: "E4", duration: 2000 }
-            ],
-            novemberRain: [
-                { text: "Don't", note: "G4", duration: 800 },
-                { text: "you", note: "A4", duration: 600 },
-                { text: "think", note: "A#4", duration: 600 },
-                { text: "that", note: "C5", duration: 600 },
-                { text: "you", note: "D5", duration: 800 },
-                { text: "need", note: "C5", duration: 800 },
-                { text: "somebody?", note: "A#4", duration: 1800 },
-                { text: "", note: "", newLine: true },
-                { text: "Don't", note: "G4", duration: 800 },
-                { text: "you", note: "A4", duration: 600 },
-                { text: "think", note: "A#4", duration: 600 },
-                { text: "that", note: "C5", duration: 600 },
-                { text: "you", note: "D5", duration: 800 },
-                { text: "need", note: "F5", duration: 800 },
-                { text: "someone?", note: "D5", duration: 1800 },
-                { text: "", note: "", newLine: true },
-                { text: "Everybody", note: "C5", duration: 1200 },
-                { text: "needs", note: "A#4", duration: 800 },
-                { text: "somebody", note: "A4", duration: 1200 },
-                { text: "...", note: "G4", duration: 1500 }
-            ]
-        };
+        // Nuottien nimet taajuuksille
+        const noteStrings = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
-        let currentSong = [];
-        let currentIndex = -1;
-
-        function initAudio() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            }
+        function noteFromPitch(frequency) {
+            const noteNum = 12 * (Math.log(frequency / 440) / Math.log(2));
+            return Math.round(noteNum) + 69;
         }
 
-        function loadSong() {
-            resetSong();
-            const songKey = document.getElementById('song-select').value;
-            currentSong = songDatabase[songKey];
+        async function aloitaKaikki() {
+            audioChunks = [];
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
             
-            const display = document.getElementById('lyrics-display');
-            display.innerHTML = '';
+            // 1. ÄÄNITYS (Kuten Audacity)
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = event => audioChunks.push(event.data);
+            mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                document.getElementById("audioPlayback").src = URL.createObjectURL(audioBlob);
+                document.getElementById("audioPlayerBox").style.display = "block";
+                annaPalautetta();
+            };
+            mediaRecorder.start();
 
-            currentSong.forEach((item, index) => {
-                if (item.newLine) {
-                    const br = document.createElement('div');
-                    br.className = 'line-break';
-                    display.appendChild(br);
-                } else {
-                    const span = document.createElement('span');
-                    span.className = 'word';
-                    span.id = `word-${index}`;
-                    span.innerText = item.text;
-                    display.appendChild(span);
+            // 2. REAALIAIKAINEN ANALYYSI (Yousician)
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            analyser = audioContext.createAnalyser();
+            analyser.fftSize = 2048;
+            source = audioContext.createMediaStreamSource(stream);
+            source.connect(analyser);
+            dataArray = new Float32Array(analyser.fftSize);
+
+            document.getElementById("startBtn").style.display = "none";
+            document.getElementById("stopBtn").style.display = "block";
+            document.getElementById("palauteBox").style.display = "none";
+
+            paivitaNuotti();
+        }
+
+        // Autokorrelaatio-algoritmi (laskee äänen korkeuden)
+        function autoCorrelate(buffer, sampleRate) {
+            let SIZE = buffer.length;
+            let maxSamples = Math.floor(SIZE / 2);
+            let bestOffset = -1;
+            let bestCorrelation = 0;
+            let rms = 0;
+
+            for (let i = 0; i < SIZE; i++) {
+                let val = buffer[i];
+                rms += val * val;
+            }
+            rms = Math.sqrt(rms / SIZE);
+            if (rms < 0.01) return -1; // Liian hiljainen ääni
+
+            let lastCorrelation = 1;
+            for (let offset = 0; offset < maxSamples; offset++) {
+                let correlation = 0;
+
+                for (let i = 0; i < maxSamples; i++) {
+                    correlation += Math.abs((buffer[i]) - (buffer[i + offset]));
                 }
-            });
-        }
-
-        function startSong() {
-            initAudio();
-            resetSong();
-            currentIndex = 0;
-            playLoop();
-        }
-
-        // Tämä funktio pyörittää karaokea itsestään sanasta seuraavaan
-        function playLoop() {
-            if (currentIndex >= currentSong.length) {
-                return; // Biisi loppui
-            }
-
-            const currentStep = currentSong[currentIndex];
-
-            if (currentStep.newLine) {
-                currentIndex++;
-                playLoop();
-                return;
-            }
-
-            // Väritetään sanat
-            currentSong.forEach((item, index) => {
-                const el = document.getElementById(`word-${index}`);
-                if (el) {
-                    if (index < currentIndex) el.className = 'word passed';
-                    else if (index === currentIndex) el.className = 'word active';
-                    else el.className = 'word';
+                correlation = 1 - (correlation / maxSamples);
+                if ((correlation > 0.9) && (correlation > lastCorrelation)) {
+                    if (correlation > bestCorrelation) {
+                        bestCorrelation = correlation;
+                        bestOffset = offset;
+                    }
                 }
-            });
+                lastCorrelation = correlation;
+            }
+            if (bestCorrelation > 0.01) {
+                return sampleRate / bestOffset;
+            }
+            return -1;
+        }
 
-            // Soitetaan nuotti automaattisesti
-            if (currentStep.note && notes[currentStep.note]) {
-                const osc = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
+        function paivitaNuotti() {
+            analyser.getFloatTimeDomainData(dataArray);
+            let pitch = autoCorrelate(dataArray, audioContext.sampleRate);
+
+            if (pitch === -1 || pitch > 1000) {
+                // Ei lauleta mitään tai ääni on häiriötä
+            } else {
+                let noteNum = noteFromPitch(pitch);
+                let noteName = noteStrings[noteNum % 12];
+                let octave = Math.floor(noteNum / 12) - 1;
                 
-                osc.type = 'sine';
-                osc.frequency.value = notes[currentStep.note];
-                
-                // Pidetään ääntä yllä melkein koko sanan keston ajan
-                const noteDurationSeconds = (currentStep.duration - 50) / 1000;
-                
-                gainNode.gain.setValueAtTime(0.2, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + noteDurationSeconds);
-                
-                osc.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                
-                osc.start();
-                osc.stop(audioCtx.currentTime + noteDurationSeconds);
+                document.getElementById("noteDisplay").innerText = noteName + octave;
+                document.getElementById("hzDisplay").innerText = Math.round(pitch) + " Hz";
             }
 
-            // Asetetaan ajastin siirtymään seuraavaan sanaan automaattisesti!
-            currentIndex++;
-            playTimeout = setTimeout(playLoop, currentStep.duration);
+            animationId = requestAnimationFrame(paivitaNuotti);
         }
 
-        function resetSong() {
-            clearTimeout(playTimeout);
-            currentIndex = -1;
-            currentSong.forEach((item, index) => {
-                const el = document.getElementById(`word-${index}`);
-                if (el) el.className = 'word';
-            });
+        function lopetaKaikki() {
+            mediaRecorder.stop();
+            cancelAnimationFrame(animationId);
+            if (audioContext) audioContext.close();
+            
+            document.getElementById("startBtn").style.display = "block";
+            document.getElementById("stopBtn").style.display = "none";
+            document.getElementById("noteDisplay").innerText = "Tunti päättyi";
         }
 
-        loadSong();
+        function annaPalautetta() {
+            const satunnainenKehu = kehut[Math.floor(Math.random() * kehut.length)];
+            document.getElementById("palauteTeksti").innerText = satunnainenKehu;
+            document.getElementById("palauteBox").style.display = "block";
+        }
     </script>
 </body>
 </html>
